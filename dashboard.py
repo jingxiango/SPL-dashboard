@@ -40,6 +40,7 @@ df_position["goals_per_90"] = df_position["goals"] / df_position["minutesplayed"
 df_position["xg_per_90"] = df_position["expectedgoals"] / df_position["minutesplayed"] * 90
 df_position["shots_per_90"] = df_position["totalshots"] / df_position["minutesplayed"] * 90
 df_position["assists_per_90"] = df_position["assists"] / df_position["minutesplayed"] * 90
+df_position["expectedassists_per_90"] = df_position["expectedassists"] / df_position["minutesplayed"] * 90
 df_position["keypasses_per_90"] = df_position["keypasses"] / df_position["minutesplayed"] * 90
 df_position["bigchancescreated_per_90"] = df_position["bigchancescreated"] / df_position["minutesplayed"] * 90
 df_position["dribbles_per_90"] = df_position["successfuldribbles"] / df_position["minutesplayed"] * 90
@@ -50,6 +51,7 @@ df_position["clearances_per_90"] = df_position["clearances"] / df_position["minu
 df_position["saves_per_90"] = df_position["saves"] / df_position["minutesplayed"] * 90
 df_position["goalsconceded_per_90"] = df_position["goalsconceded"] / df_position["minutesplayed"] * 90
 df_position["longballs_per_90"] = df_position["totallongballs"] / df_position["minutesplayed"] * 90
+df_position["fouls_per_90"] = df_position["fouls"] / df_position["minutesplayed"] * 90
 
 # Also compute stats for filtered data (for display)
 df_filtered = df_filtered.copy()
@@ -57,6 +59,7 @@ df_filtered["goals_per_90"] = df_filtered["goals"] / df_filtered["minutesplayed"
 df_filtered["xg_per_90"] = df_filtered["expectedgoals"] / df_filtered["minutesplayed"] * 90
 df_filtered["shots_per_90"] = df_filtered["totalshots"] / df_filtered["minutesplayed"] * 90
 df_filtered["assists_per_90"] = df_filtered["assists"] / df_filtered["minutesplayed"] * 90
+df_filtered["expectedassists_per_90"] = df_filtered["expectedassists"] / df_filtered["minutesplayed"] * 90
 df_filtered["keypasses_per_90"] = df_filtered["keypasses"] / df_filtered["minutesplayed"] * 90
 df_filtered["bigchancescreated_per_90"] = df_filtered["bigchancescreated"] / df_filtered["minutesplayed"] * 90
 df_filtered["dribbles_per_90"] = df_filtered["successfuldribbles"] / df_filtered["minutesplayed"] * 90
@@ -67,14 +70,15 @@ df_filtered["clearances_per_90"] = df_filtered["clearances"] / df_filtered["minu
 df_filtered["saves_per_90"] = df_filtered["saves"] / df_filtered["minutesplayed"] * 90
 df_filtered["goalsconceded_per_90"] = df_filtered["goalsconceded"] / df_filtered["minutesplayed"] * 90
 df_filtered["longballs_per_90"] = df_filtered["totallongballs"] / df_filtered["minutesplayed"] * 90
+df_filtered["fouls_per_90"] = df_filtered["fouls"] / df_filtered["minutesplayed"] * 90
 
 # === Choose radar stats based on position ===
 if position == "F":  # Forwards
     params = [
         "Goals per 90", "Expected Goals per 90", "Shots per 90", "Goal Conversion %", 
-        "Assists per 90", 
+        "Assists per 90",
         "Key Passes per 90", "Big Chances Created per 90", "Dribbles per 90", 
-        "Aerial Duel Win %"
+        "Aerial Duel Win %", 
     ]
     raw_stats = [
         "goals_per_90", "xg_per_90", "shots_per_90", "goalconversionpercentage", 
@@ -84,21 +88,21 @@ if position == "F":  # Forwards
     ]
 elif position == "M":  # Midfielders
     params = [
-        "Assists per 90", "Key Passes per 90", "Big Chances Created per 90", "Dribbles per 90",
+        "Assists per 90", "Expected Assists per 90", "Key Passes per 90", "Big Chances Created per 90", "Dribbles per 90", "Successful Dribbles %",
         "Passes per 90", "Pass Accuracy %", "Tackles per 90", "Interceptions per 90", "Duel Win %"
     ]
     raw_stats = [
-        "assists_per_90", "keypasses_per_90", "bigchancescreated_per_90", "dribbles_per_90",
+        "assists_per_90", "expectedassists_per_90", "keypasses_per_90", "bigchancescreated_per_90", "dribbles_per_90", "successfuldribblespercentage",
         "passes_per_90", "accuratepassespercentage", "tackles_per_90", "interceptions_per_90", "totalduelswonpercentage"
     ]
 elif position == "D":  # Defenders
     params = [
         "Tackles per 90", "Interceptions per 90", "Clearances per 90", "Aerial Duel Win %",
-        "Duel Win %", "Passes per 90", "Pass Accuracy %", "Clean Sheets", "Goals per 90"
+        "Duel Win %", "Passes per 90", "Pass Accuracy %", "Errors Leading to Shots", "Fouls Per 90", "Long Balls per 90", "Long Ball Accuracy %"
     ]
     raw_stats = [
         "tackles_per_90", "interceptions_per_90", "clearances_per_90", "aerialduelswonpercentage",
-        "totalduelswonpercentage", "passes_per_90", "accuratepassespercentage", "cleansheet(df)", "goals_per_90"
+        "totalduelswonpercentage", "passes_per_90", "accuratepassespercentage", "errorleadtoshots", "fouls_per_90", "longballs_per_90", "accuratelongballspercentage"
     ]
 else:  # Goalkeepers
     params = [
@@ -121,7 +125,7 @@ player_name = st.selectbox(f"Select player:", df_filtered["player_name"].unique(
 st.subheader("Player Comparison")
 compare_players = st.multiselect(
     "Select player to compare with (max 1):",
-    df_filtered["player_name"].unique(),
+    df_position["player_name"].unique(),
     default=None,
     max_selections=1
 )
@@ -196,7 +200,7 @@ for stat in raw_stats:
 comparison_data = []
 if compare_players:
     for comp_player in compare_players:
-        comp_player_data = df_filtered[df_filtered["player_name"] == comp_player]
+        comp_player_data = df_position[df_position["player_name"] == comp_player]
         if len(comp_player_data) > 0:
             comp_row = comp_player_data.iloc[0]
             comp_raw_values = []
@@ -307,7 +311,7 @@ if comparison_data:
     st.subheader("Comparison Statistics")
     comp_stats = []
     for comp in comparison_data:
-        comp_row = df_filtered[df_filtered["player_name"] == comp['name']].iloc[0]
+        comp_row = df_position[df_position["player_name"] == comp['name']].iloc[0]
         comp_data = {"Player": comp['name'], "Team": comp['team']}
         for i, param in enumerate(params):
             raw_stat = raw_stats[i]
@@ -335,12 +339,23 @@ if selected_team != "All Teams":
     if len(team_players) > 1:
         comparison_data = []
         for _, player in team_players.iterrows():
-            player_percentiles = df_position[df_position["player_name"] == player["player_name"]].iloc[0].values.tolist()
+            # Calculate percentiles for the radar stats only
+            player_percentiles = []
+            for stat in raw_stats:
+                if stat in player:
+                    # Get the percentile for this stat
+                    all_values = df_position[stat].dropna()
+                    if len(all_values) > 0:
+                        player_value = player[stat]
+                        percentile = (all_values < player_value).mean() * 100
+                        player_percentiles.append(percentile)
+            
+            avg_percentile = np.mean(player_percentiles) if player_percentiles else 0
             comparison_data.append({
                 "Player": player["player_name"],
                 "Team": player["team_name"],
                 "Minutes": player["minutesplayed"],
-                "Avg Percentile": f"{np.mean(player_percentiles):.1f}%"
+                "Avg Percentile": f"{avg_percentile:.1f}%"
             })
         
         comparison_df = pd.DataFrame(comparison_data)
