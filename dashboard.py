@@ -18,10 +18,10 @@ st.title("Singapore Premier League Player Radar Dashboard")
 col1, col2 = st.columns(2)
 
 with col1:
-    position = st.selectbox("Select position:", ["FW", "MF", "DF", "GK"])
+    position = st.selectbox("Select position:", ["F", "M", "D", "GK"])
 
 # Filter by position first for all calculations
-df_position = df[df["position_new"] == position]
+df_position = df[df["position_new"] == position].copy()
 
 with col2:
     # Get unique teams for the selected position
@@ -30,9 +30,9 @@ with col2:
 
 # Apply team filter for display only
 if selected_team != "All Teams":
-    df_filtered = df_position[df_position["team_name"] == selected_team]
+    df_filtered = df_position[df_position["team_name"] == selected_team].copy()
 else:
-    df_filtered = df_position
+    df_filtered = df_position.copy()
 
 # === Compute stats based on position ===
 # Calculate per 90 stats for all players in this position
@@ -111,6 +111,10 @@ else:  # Goalkeepers
     ]
 
 # === Player selection ===
+if len(df_filtered) == 0:
+    st.error("No players found for the selected position and team combination. Please try different filters.")
+    st.stop()
+
 player_name = st.selectbox(f"Select player:", df_filtered["player_name"].unique())
 
 # Add comparison functionality
@@ -174,9 +178,9 @@ for stat in raw_stats:
         })
 
 # Debug output
-st.subheader("Debug: Radar Boundaries (StatsBomb Rule)")
-debug_df = pd.DataFrame(debug_info)
-st.dataframe(debug_df, use_container_width=True)
+#st.subheader("Debug: Radar Boundaries (StatsBomb Rule)")
+#debug_df = pd.DataFrame(debug_info)
+#st.dataframe(debug_df, use_container_width=True)
 
 #radar chart
 
@@ -192,18 +196,20 @@ for stat in raw_stats:
 comparison_data = []
 if compare_players:
     for comp_player in compare_players:
-        comp_row = df_filtered[df_filtered["player_name"] == comp_player].iloc[0]
-        comp_raw_values = []
-        for stat in raw_stats:
-            if stat in comp_row:
-                comp_raw_values.append(comp_row[stat])
-            else:
-                comp_raw_values.append(0)
-        comparison_data.append({
-            'name': comp_player,
-            'raw_values': comp_raw_values,
-            'team': comp_row['team_name']
-        })
+        comp_player_data = df_filtered[df_filtered["player_name"] == comp_player]
+        if len(comp_player_data) > 0:
+            comp_row = comp_player_data.iloc[0]
+            comp_raw_values = []
+            for stat in raw_stats:
+                if stat in comp_row:
+                    comp_raw_values.append(comp_row[stat])
+                else:
+                    comp_raw_values.append(0)
+            comparison_data.append({
+                'name': comp_player,
+                'raw_values': comp_raw_values,
+                'team': comp_row['team_name']
+            })
 
 radar = Radar(params, low, high, round_int=[False]*len(params), num_rings=4, ring_width=1, center_circle_radius=1)
 
