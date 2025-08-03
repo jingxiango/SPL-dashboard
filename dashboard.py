@@ -130,10 +130,10 @@ player_name = st.selectbox(f"Select player:", df_filtered["player_name"].unique(
 # Add comparison functionality
 st.subheader("Player Comparison")
 compare_players = st.multiselect(
-    "Select player to compare with (max 1):",
+    "Select player to compare with (max 3):",
     df_position["player_name"].unique(),
     default=None,
-    max_selections=1
+    max_selections=3
 )
 
 # Get selected player data
