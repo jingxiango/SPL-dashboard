@@ -81,34 +81,54 @@ df_filtered["errorleadtoshot_per_90"] = df_filtered["errorleadtoshot"] / df_filt
 # === Choose radar stats based on position ===
 if position == "F":  # Forwards
     params = [
-        "Goals per 90", "Expected Goals per 90", "Shots per 90", "Goal Conversion %", 
-        "Assists per 90",
-        "Key Passes per 90", "Big Chances Created per 90", "Big Chances Missed per 90", "Dribbles per 90", 
-        "Aerial Duel Win %", 
+        # Attack
+        "Goals per 90", "Expected Goals per 90", "Shots per 90", "Goal Conversion %", "Big Chances Missed per 90",
+        # Midfield
+        "Assists per 90", "Key Passes per 90", "Big Chances Created per 90", "Dribbles per 90",
+        # Defense
+        "Aerial Duel Win %"
     ]
     raw_stats = [
-        "goals_per_90", "xg_per_90", "shots_per_90", "goalconversionpercentage", 
-        "assists_per_90",
-        "keypasses_per_90", "bigchancescreated_per_90", "bigchancesmissed_per_90", "dribbles_per_90",
+        # Attack
+        "goals_per_90", "xg_per_90", "shots_per_90", "goalconversionpercentage", "bigchancesmissed_per_90",
+        # Midfield
+        "assists_per_90", "keypasses_per_90", "bigchancescreated_per_90", "dribbles_per_90",
+        # Defense
         "aerialduelswonpercentage"
     ]
 elif position == "M":  # Midfielders
     params = [
-        "Assists per 90", "Expected Assists per 90", "Key Passes per 90", "Big Chances Created per 90", "Dribbles per 90", "Successful Dribbles %",
-        "Passes per 90", "Pass Accuracy %", "Final Third Passes per 90", "Tackles per 90", "Interceptions per 90", "Duel Win %"
+        # Attack
+        "Assists per 90", "Expected Assists per 90", "Key Passes per 90", "Big Chances Created per 90",
+        # Midfield
+        "Dribbles per 90", "Successful Dribbles %", "Passes per 90", "Pass Accuracy %", "Final Third Passes per 90",
+        # Defense
+        "Tackles per 90", "Interceptions per 90", "Duel Win %"
     ]
     raw_stats = [
-        "assists_per_90", "expectedassists_per_90", "keypasses_per_90", "bigchancescreated_per_90", "dribbles_per_90", "successfuldribblespercentage",
-        "passes_per_90", "accuratepassespercentage", "accuratefinalthirdpasses_per_90", "tackles_per_90", "interceptions_per_90", "totalduelswonpercentage"
+        # Attack
+        "assists_per_90", "expectedassists_per_90", "keypasses_per_90", "bigchancescreated_per_90",
+        # Midfield
+        "dribbles_per_90", "successfuldribblespercentage", "passes_per_90", "accuratepassespercentage", "accuratefinalthirdpasses_per_90",
+        # Defense
+        "tackles_per_90", "interceptions_per_90", "totalduelswonpercentage"
     ]
 elif position == "D":  # Defenders
     params = [
-        "Tackles per 90", "Interceptions per 90", "Clearances per 90", "Aerial Duel Win %",
-        "Duel Win %", "Passes per 90", "Pass Accuracy %", "Errors Leading to Shots", "Fouls Per 90", "Long Balls per 90", "Long Ball Accuracy %"
+        # Attack
+        "Long Balls per 90", "Long Ball Accuracy %",
+        # Midfield
+        "Passes per 90", "Pass Accuracy %",
+        # Defense
+        "Tackles per 90", "Interceptions per 90", "Clearances per 90", "Aerial Duel Win %", "Duel Win %", "Errors Leading to Shots", "Fouls Per 90"
     ]
     raw_stats = [
-        "tackles_per_90", "interceptions_per_90", "clearances_per_90", "aerialduelswonpercentage",
-        "totalduelswonpercentage", "passes_per_90", "accuratepassespercentage", "errorleadtoshot_per_90", "fouls_per_90", "longballs_per_90", "accuratelongballspercentage"
+        # Attack
+        "longballs_per_90", "accuratelongballspercentage",
+        # Midfield
+        "passes_per_90", "accuratepassespercentage",
+        # Defense
+        "tackles_per_90", "interceptions_per_90", "clearances_per_90", "aerialduelswonpercentage", "totalduelswonpercentage", "errorleadtoshot_per_90", "fouls_per_90"
     ]
 else:  # Goalkeepers
     params = [
