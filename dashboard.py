@@ -248,8 +248,8 @@ if comparison_data:
     axs['radar'].text(0.02, 0.98, legend_text, transform=axs['radar'].transAxes, 
                       fontsize=10, color='#aa65b2', weight='bold', va='top')
     
-    comparison_colors = ['#66d8ba', '#697cd4', '#ff7f0e', '#d62728', '#9467bd']
-    color_names = ['Teal', 'Blue', 'Orange', 'Red', 'Purple']
+    comparison_colors = ['#66d8ba', '#697cd4', '#ff7f0e', '#d62728', '#9467bd', '#2ca02c', '#e377c2', '#8c564b']
+    color_names = ['Teal', 'Blue', 'Orange', 'Red', 'Purple', 'Green', 'Pink', 'Brown']
     
     for i, comp_player in enumerate(comparison_data):
         color = comparison_colors[i % len(comparison_colors)]
