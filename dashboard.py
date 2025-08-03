@@ -244,14 +244,20 @@ axs['radar'].scatter(vertices[:, 0], vertices[:, 1],
 
 # Draw comparison players if selected
 if comparison_data:
-    for i, comp_player in enumerate(comparison_data):        
+    comparison_colors = ['#66d8ba', '#697cd4', '#ff7f0e', '#d62728', '#9467bd', '#2ca02c', '#e377c2', '#8c564b']
+    edge_colors = ['#216352', '#2a2f5c', '#8b4513', '#8b0000', '#4b0082', '#006400', '#8b008b', '#654321']
+    
+    for i, comp_player in enumerate(comparison_data):
+        color = comparison_colors[i % len(comparison_colors)]
+        edge_color = edge_colors[i % len(edge_colors)]
+        
         comp_radar_output = radar.draw_radar_solid(comp_player['raw_values'], ax=axs['radar'],
-                                            kwargs={'facecolor': '#66d8ba', 'alpha': 0.6, 'edgecolor': '#216352', 'lw': 3})
+                                            kwargs={'facecolor': color, 'alpha': 0.6, 'edgecolor': edge_color, 'lw': 3})
         comp_poly, comp_vertices = comp_radar_output
         
         # Add scatter points for comparison player
         axs['radar'].scatter(comp_vertices[:, 0], comp_vertices[:, 1],
-                            c='#66d8ba', edgecolors='#216352', marker='o', s=100, zorder=2)
+                            c=color, edgecolors=edge_color, marker='o', s=100, zorder=2)
 
 # Draw range labels (percentile numbers on rings)
 range_labels = radar.draw_range_labels(ax=axs['radar'], fontsize=12, color='black')
