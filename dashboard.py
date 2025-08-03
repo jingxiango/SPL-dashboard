@@ -43,6 +43,7 @@ df_position["assists_per_90"] = df_position["assists"] / df_position["minutespla
 df_position["expectedassists_per_90"] = df_position["expectedassists"] / df_position["minutesplayed"] * 90
 df_position["keypasses_per_90"] = df_position["keypasses"] / df_position["minutesplayed"] * 90
 df_position["bigchancescreated_per_90"] = df_position["bigchancescreated"] / df_position["minutesplayed"] * 90
+df_position["bigchancesmissed_per_90"] = df_position["bigchancesmissed"] / df_position["minutesplayed"] * 90
 df_position["dribbles_per_90"] = df_position["successfuldribbles"] / df_position["minutesplayed"] * 90
 df_position["passes_per_90"] = df_position["totalpasses"] / df_position["minutesplayed"] * 90
 df_position["tackles_per_90"] = df_position["tackles"] / df_position["minutesplayed"] * 90
@@ -52,6 +53,8 @@ df_position["saves_per_90"] = df_position["saves"] / df_position["minutesplayed"
 df_position["goalsconceded_per_90"] = df_position["goalsconceded"] / df_position["minutesplayed"] * 90
 df_position["longballs_per_90"] = df_position["totallongballs"] / df_position["minutesplayed"] * 90
 df_position["fouls_per_90"] = df_position["fouls"] / df_position["minutesplayed"] * 90
+df_position["accuratefinalthirdpasses_per_90"] = df_position["accuratefinalthirdpasses"] / df_position["minutesplayed"] * 90
+df_position["errorleadtoshot_per_90"] = df_position["errorleadtoshot"] / df_position["minutesplayed"] * 90
 
 # Also compute stats for filtered data (for display)
 df_filtered = df_filtered.copy()
@@ -62,6 +65,7 @@ df_filtered["assists_per_90"] = df_filtered["assists"] / df_filtered["minutespla
 df_filtered["expectedassists_per_90"] = df_filtered["expectedassists"] / df_filtered["minutesplayed"] * 90
 df_filtered["keypasses_per_90"] = df_filtered["keypasses"] / df_filtered["minutesplayed"] * 90
 df_filtered["bigchancescreated_per_90"] = df_filtered["bigchancescreated"] / df_filtered["minutesplayed"] * 90
+df_filtered["bigchancesmissed_per_90"] = df_filtered["bigchancesmissed"] / df_filtered["minutesplayed"] * 90
 df_filtered["dribbles_per_90"] = df_filtered["successfuldribbles"] / df_filtered["minutesplayed"] * 90
 df_filtered["passes_per_90"] = df_filtered["totalpasses"] / df_filtered["minutesplayed"] * 90
 df_filtered["tackles_per_90"] = df_filtered["tackles"] / df_filtered["minutesplayed"] * 90
@@ -71,29 +75,31 @@ df_filtered["saves_per_90"] = df_filtered["saves"] / df_filtered["minutesplayed"
 df_filtered["goalsconceded_per_90"] = df_filtered["goalsconceded"] / df_filtered["minutesplayed"] * 90
 df_filtered["longballs_per_90"] = df_filtered["totallongballs"] / df_filtered["minutesplayed"] * 90
 df_filtered["fouls_per_90"] = df_filtered["fouls"] / df_filtered["minutesplayed"] * 90
+df_filtered["accuratefinalthirdpasses_per_90"] = df_filtered["accuratefinalthirdpasses"] / df_filtered["minutesplayed"] * 90
+df_filtered["errorleadtoshot_per_90"] = df_filtered["errorleadtoshot"] / df_filtered["minutesplayed"] * 90
 
 # === Choose radar stats based on position ===
 if position == "F":  # Forwards
     params = [
         "Goals per 90", "Expected Goals per 90", "Shots per 90", "Goal Conversion %", 
         "Assists per 90",
-        "Key Passes per 90", "Big Chances Created per 90", "Dribbles per 90", 
+        "Key Passes per 90", "Big Chances Created per 90", "Big Chances Missed per 90", "Dribbles per 90", 
         "Aerial Duel Win %", 
     ]
     raw_stats = [
         "goals_per_90", "xg_per_90", "shots_per_90", "goalconversionpercentage", 
         "assists_per_90",
-        "keypasses_per_90", "bigchancescreated_per_90", "dribbles_per_90",
+        "keypasses_per_90", "bigchancescreated_per_90", "bigchancesmissed_per_90", "dribbles_per_90",
         "aerialduelswonpercentage"
     ]
 elif position == "M":  # Midfielders
     params = [
         "Assists per 90", "Expected Assists per 90", "Key Passes per 90", "Big Chances Created per 90", "Dribbles per 90", "Successful Dribbles %",
-        "Passes per 90", "Pass Accuracy %", "Tackles per 90", "Interceptions per 90", "Duel Win %"
+        "Passes per 90", "Pass Accuracy %", "Final Third Passes per 90", "Tackles per 90", "Interceptions per 90", "Duel Win %"
     ]
     raw_stats = [
         "assists_per_90", "expectedassists_per_90", "keypasses_per_90", "bigchancescreated_per_90", "dribbles_per_90", "successfuldribblespercentage",
-        "passes_per_90", "accuratepassespercentage", "tackles_per_90", "interceptions_per_90", "totalduelswonpercentage"
+        "passes_per_90", "accuratepassespercentage", "accuratefinalthirdpasses_per_90", "tackles_per_90", "interceptions_per_90", "totalduelswonpercentage"
     ]
 elif position == "D":  # Defenders
     params = [
@@ -102,7 +108,7 @@ elif position == "D":  # Defenders
     ]
     raw_stats = [
         "tackles_per_90", "interceptions_per_90", "clearances_per_90", "aerialduelswonpercentage",
-        "totalduelswonpercentage", "passes_per_90", "accuratepassespercentage", "errorleadtoshots", "fouls_per_90", "longballs_per_90", "accuratelongballspercentage"
+        "totalduelswonpercentage", "passes_per_90", "accuratepassespercentage", "errorleadtoshot_per_90", "fouls_per_90", "longballs_per_90", "accuratelongballspercentage"
     ]
 else:  # Goalkeepers
     params = [
@@ -144,47 +150,19 @@ for stat in raw_stats:
         if len(all_values) > 0:
             # Use StatsBomb's rule: 5th percentile for bottom, 95th percentile for top
             stat_min = all_values.quantile(0.05)  # Bottom 5%
-            stat_max = all_values.quantile(1)  # Top 5%
+            stat_max = all_values.quantile(1)  #top 100%
             
             low.append(stat_min)
             high.append(stat_max)
             
-            # Debug info
-            debug_info.append({
-                'stat': stat,
-                'min': stat_min,
-                'max': stat_max,
-                'actual_min': all_values.min(),
-                'actual_max': all_values.max(),
-                'mean': all_values.mean()
-            })
         else:
             low.append(0)
             high.append(100)
-            debug_info.append({
-                'stat': stat,
-                'min': 0,
-                'max': 100,
-                'actual_min': 0,
-                'actual_max': 0,
-                'mean': 0
-            })
+
     else:
         low.append(0)
         high.append(100)
-        debug_info.append({
-            'stat': stat,
-            'min': 0,
-            'max': 100,
-            'actual_min': 0,
-            'actual_max': 0,
-            'mean': 0
-        })
 
-# Debug output
-#st.subheader("Debug: Radar Boundaries (StatsBomb Rule)")
-#debug_df = pd.DataFrame(debug_info)
-#st.dataframe(debug_df, use_container_width=True)
 
 #radar chart
 
@@ -215,7 +193,17 @@ if compare_players:
                 'team': comp_row['team_name']
             })
 
-radar = Radar(params, low, high, round_int=[False]*len(params), num_rings=4, ring_width=1, center_circle_radius=1)
+# Add anything to this list where having a lower number is better
+# this flips the statistic
+lower_is_better = ['Errors Leading to Shots', 'Big Chances Missed per 90', 'Fouls Per 90']
+radar = Radar(params, low, high,
+              lower_is_better=lower_is_better,
+              # whether to round any of the labels to integers instead of decimal places
+              round_int=[False]*len(params),
+              num_rings=4,  # the number of concentric circles (excluding center circle)
+              # if the ring_width is more than the center_circle_radius then
+              # the center circle radius will be wider than the width of the concentric circles
+              ring_width=1, center_circle_radius=1)
 
 # Creating the figure using the grid function from mplsoccer:
 fig, axs = grid(figheight=14, grid_height=0.915, title_height=0.06, endnote_height=0.025,
